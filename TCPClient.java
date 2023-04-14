@@ -2,9 +2,9 @@ import java.io.*;
 import java.net.*;
 class TCPClient {
 
-    public static void main(String arg[]) throws Exception
+    public static void main(String[] arg) throws Exception
     {
-        System.out.println("Client Started: ");
+        System.out.println("Client Started");
         String sentence;
         String modifiedSentence;
 
@@ -22,7 +22,6 @@ class TCPClient {
 
         while(true) {
             sentence = inFromUser.readLine().toLowerCase();
-            System.out.println("read from line");
             if(sentence.equals("exit")){
                 break;
             }

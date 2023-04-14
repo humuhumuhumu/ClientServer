@@ -3,29 +3,22 @@ import java.net.*;
 
 class TCPServer {
 
-    public static void main(String argv[]) throws Exception
+    public static void main(String[] argv) throws Exception
     {
         System.out.println("Server started");
-
-        int port;
-
-        //System.out.println("Input the port that you want the server to use: ");
 
         BufferedReader inFromServer =
                 new BufferedReader(new InputStreamReader(System.in));
 
-        //port = Integer.valueOf(inFromServer.readLine());
-        //ServerSocket welcomeSocket = new ServerSocket(port);
-
-
         ServerSocket welcomeSocket = new ServerSocket(6789);
 
         while(true) {
-
-            Socket connectionSocket = welcomeSocket.accept();
-            System.out.println("try to push connection tothread");
-            new Thread(new serverThread(connectionSocket)).start();
-            System.out.println("successfully pushed it to thread");
+            try {
+                Socket connectionSocket = welcomeSocket.accept();
+                new Thread(new serverThread(connectionSocket)).start();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 }
@@ -38,7 +31,6 @@ class serverThread extends Thread{
 
     public void run(){
         try{
-            System.out.println("Threads???/");
             // initializeing input output streams
             String input, output;
             BufferedReader inFromClient =
@@ -49,7 +41,6 @@ class serverThread extends Thread{
 
             // receiving and sending back commands
             while((input = inFromClient.readLine())!=null) {
-                System.out.println("help");
                 //terminating
                 if (input.equals("exit")){
                     System.out.println("Closing a connection");
@@ -61,9 +52,7 @@ class serverThread extends Thread{
 
                 output = input + "test";
 
-                outToClient.writeBytes("hi" + '\n');
-
-                System.out.println("done writing");
+                outToClient.writeBytes(output + '\n');
             }
 
 

@@ -57,18 +57,21 @@ class serverThread extends Thread{
 
 
             // receiving and sending back commands
-            while((input = inFromClient.readLine()) != null) {
+            while(true) {
+                input = inFromClient.readLine();
                 System.out.println("help");
                 //terminating
                 if (input.equals("exit")){
                     System.out.println("Closing a connection");
                     break;
                 }
+                System.out.println("inb4 writing");
 
                 // do stuff here
 
                 outToClient.writeBytes(input + "test");
 
+                System.out.println("done writing");
             }
 
 

@@ -2,7 +2,7 @@ import java.io.*;
 import java.net.*;
 class TCPClient {
 
-    public static void main(String argv[]) throws Exception
+    public static void main(String arg[]) throws Exception
     {
         String sentence;
         String modifiedSentence;
@@ -19,7 +19,8 @@ class TCPClient {
                 new BufferedReader(new
                         InputStreamReader(clientSocket.getInputStream()));
 
-        while((sentence = inFromUser.readLine().toLowerCase()) != null) {
+        while(true) {
+            sentence = inFromUser.readLine().toLowerCase();
             System.out.println("read from line");
             if(sentence.equals("exit")){
                 break;

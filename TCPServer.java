@@ -10,12 +10,15 @@ class TCPServer {
         BufferedReader inFromServer =
                 new BufferedReader(new InputStreamReader(System.in));
 
-        ServerSocket welcomeSocket = new ServerSocket(6789);
+        ServerSocket welcomeSocket = new ServerSocket(1234);
 
         while(true) {
             try {
                 Socket connectionSocket = welcomeSocket.accept();
-                new Thread(new serverThread(connectionSocket)).start();
+
+                Thread t = new Thread(new serverThread(connectionSocket));
+                t.start();
+
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -30,6 +33,7 @@ class serverThread extends Thread{
     }
 
     public void run(){
+
         try{
             // initializeing input output streams
             String input, output;
@@ -39,6 +43,16 @@ class serverThread extends Thread{
             DataOutputStream outToClient =
                     new DataOutputStream(clientSocket.getOutputStream());
 
+            // Ack connection
+            outToClient.writeBytes("1" + '\n');
+
+            // read Name
+            String name = "";
+            if ((input = inFromClient.readLine())!= null){
+                name = input;
+                System.out.println(name + " has entered");
+            }
+
             // receiving and sending back commands
             while((input = inFromClient.readLine())!=null) {
                 //terminating
@@ -46,7 +60,7 @@ class serverThread extends Thread{
                     System.out.println("Closing a connection");
                     break;
                 }
-                System.out.println("input is : " + input);
+                System.out.println(name + ": "+ input);
 
                 // do stuff here
 
@@ -62,7 +76,6 @@ class serverThread extends Thread{
         } catch (IOException e){
             e.printStackTrace();
         }
-
     }
 }
 

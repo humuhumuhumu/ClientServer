@@ -5,6 +5,8 @@ class TCPServer {
 
     public static void main(String argv[]) throws Exception
     {
+        System.out.println("Server started");
+
         int port;
 
         //System.out.println("Input the port that you want the server to use: ");
@@ -20,14 +22,7 @@ class TCPServer {
 
         while(true) {
 
-            Socket connectionSocket = null;
-
-            try{
-                connectionSocket = welcomeSocket.accept();
-            }catch(IOException e){
-                e.printStackTrace();
-                System.out.println("very poggers");
-            }
+            Socket connectionSocket = welcomeSocket.accept();
             System.out.println("try to push connection tothread");
             new Thread(new serverThread(connectionSocket)).start();
             System.out.println("successfully pushed it to thread");
@@ -37,9 +32,8 @@ class TCPServer {
 
 class serverThread extends Thread{
     private Socket clientSocket;
-    public serverThread(Socket clientSocket){
-        super("serverThread");
-        this.clientSocket = clientSocket;
+    public serverThread(Socket socket){
+        this.clientSocket = socket;
     }
 
     public void run(){
@@ -50,26 +44,24 @@ class serverThread extends Thread{
             BufferedReader inFromClient =
                     new BufferedReader(new
                             InputStreamReader(clientSocket.getInputStream()));
-            DataOutputStream  outToClient =
+            DataOutputStream outToClient =
                     new DataOutputStream(clientSocket.getOutputStream());
 
-            // authentication or something
-
-
             // receiving and sending back commands
-            while(true) {
-                input = inFromClient.readLine();
+            while((input = inFromClient.readLine())!=null) {
                 System.out.println("help");
                 //terminating
                 if (input.equals("exit")){
                     System.out.println("Closing a connection");
                     break;
                 }
-                System.out.println("inb4 writing");
+                System.out.println("input is : " + input);
 
                 // do stuff here
 
-                outToClient.writeBytes(input + "test");
+                output = input + "test";
+
+                outToClient.writeBytes("hi" + '\n');
 
                 System.out.println("done writing");
             }

@@ -4,6 +4,7 @@ class TCPClient {
 
     public static void main(String arg[]) throws Exception
     {
+        System.out.println("Client Started: ");
         String sentence;
         String modifiedSentence;
 

@@ -100,7 +100,8 @@ class serverThread extends Thread{
     }
 
     public String maths(String s){
-        int index = 0;
+        int index = -1;
+        int countOperations = 0;
 
         s = s.replaceAll("\\s", "");
 
@@ -112,7 +113,8 @@ class serverThread extends Thread{
                 case '+':
                 case '-':
                     index =i;
-                    break;
+                    countOperations++;
+                    continue;
                 case '0':
                 case '1':
                 case '2':
@@ -129,19 +131,13 @@ class serverThread extends Thread{
                     break;
             }
         }
-        if(index == -1){
+        if(index == -1||countOperations != 1){
             return "NOT A VALID MATH THINGY";
         }
 
         String firstNum = s.substring(0, index);
 
-        String secondNum = "";
-        if(isInteger(s.substring(index+1))){
-            secondNum = s.substring(index+1);
-        }
-
-        System.out.println("frist numb: " + firstNum);
-        System.out.println("second: " + secondNum);
+        String secondNum = s.substring(index+1);
 
         switch (s.charAt(index)){
             case '+':

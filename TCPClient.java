@@ -1,16 +1,33 @@
 import java.io.*;
 import java.net.*;
+
+import static java.lang.System.exit;
+
 class TCPClient {
 
-    public static void main(String argv[]) throws Exception
+    public static void main(String[] arg) throws Exception
     {
+        System.out.println("Client Started");
         String sentence;
         String modifiedSentence;
 
         BufferedReader inFromUser =
                 new BufferedReader(new InputStreamReader(System.in));
+        // Name and Port input from client
+        System.out.print("Enter your name: ");
+        String name = inFromUser.readLine();
+        System.out.print("Enter Port: ");
 
-        Socket clientSocket = new Socket("127.0.0.1", 6789);
+        String p = inFromUser.readLine();
+        int port = 6789;
+        if(isInteger(p)){
+            port = Integer.parseInt(p);
+        }else{
+            System.out.println("Use a integer not a string pls");
+            exit(-1);
+        }
+
+        Socket clientSocket = new Socket("127.0.0.1", port);
 
         DataOutputStream outToServer =
                 new DataOutputStream(clientSocket.getOutputStream());
@@ -19,9 +36,22 @@ class TCPClient {
                 new BufferedReader(new
                         InputStreamReader(clientSocket.getInputStream()));
 
-        while((sentence = inFromUser.readLine().toLowerCase()) != null) {
-            System.out.println("read from line");
+
+        // CHECKING FOR CONNECTION
+        if(inFromServer.readLine().equals("1")){
+            System.out.println("Successfully Connected");
+            outToServer.writeBytes(name + '\n'); //Send name upon connection
+        } else{
+            System.out.println("L");
+            System.exit(-1);
+        }
+
+
+        while(true) {
+            System.out.print("> ");
+            sentence = inFromUser.readLine().toLowerCase();
             if(sentence.equals("exit")){
+                outToServer.writeBytes(sentence + '\n');
                 break;
             }
             outToServer.writeBytes(sentence + '\n');
@@ -34,6 +64,13 @@ class TCPClient {
         clientSocket.close();
 
     }
-}
 
-        
+    public static boolean isInteger(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+}

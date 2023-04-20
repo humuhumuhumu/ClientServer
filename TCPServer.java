@@ -1,85 +1,101 @@
 import java.io.*;
 import java.net.*;
+import java.time.*;
 
 class TCPServer {
 
-    public static void main(String argv[]) throws Exception
+    public static void main(String[] argv) throws Exception
     {
-        int port;
-
-        //System.out.println("Input the port that you want the server to use: ");
+        System.out.println("Server started");
 
         BufferedReader inFromServer =
                 new BufferedReader(new InputStreamReader(System.in));
 
-        //port = Integer.valueOf(inFromServer.readLine());
-        //ServerSocket welcomeSocket = new ServerSocket(port);
-
-
-        ServerSocket welcomeSocket = new ServerSocket(6789);
+        ServerSocket welcomeSocket = new ServerSocket(1234);
 
         while(true) {
+            try {
+                Socket connectionSocket = welcomeSocket.accept();
 
-            Socket connectionSocket = null;
+                Thread t = new Thread(new serverThread(connectionSocket));
+                t.start();
 
-            try{
-                connectionSocket = welcomeSocket.accept();
-            }catch(IOException e){
+            }catch (Exception e){
                 e.printStackTrace();
-                System.out.println("very poggers");
             }
-            System.out.println("try to push connection tothread");
-            new Thread(new serverThread(connectionSocket)).start();
-            System.out.println("successfully pushed it to thread");
         }
     }
 }
 
 class serverThread extends Thread{
     private Socket clientSocket;
-    public serverThread(Socket clientSocket){
-        super("serverThread");
-        this.clientSocket = clientSocket;
+    public serverThread(Socket socket){
+        this.clientSocket = socket;
     }
 
     public void run(){
+
         try{
-            System.out.println("Threads???/");
-            // initializeing input output streams
+            // initializing input output streams
             String input, output;
             BufferedReader inFromClient =
                     new BufferedReader(new
                             InputStreamReader(clientSocket.getInputStream()));
-            DataOutputStream  outToClient =
+            DataOutputStream outToClient =
                     new DataOutputStream(clientSocket.getOutputStream());
 
-            // authentication or something
+            Instant start, end;
+            start = Instant.now();
 
+            // Ack connection
+            outToClient.writeBytes("1" + '\n');
+
+            // read Name
+            String name = "";
+            if ((input = inFromClient.readLine())!= null){
+                name = input;
+                System.out.println(name + " has entered");
+            }
+
+            // creating user log
+            String logName = name + "-Log.txt";
+            File userlog = new File(logName);
+            if (userlog.createNewFile())
+                System.out.println("User log created");
+            else
+                System.out.println("User log exists");
+
+            FileWriter logFile = new FileWriter(userlog);
+            BufferedWriter fileWrite = new BufferedWriter(logFile);
+            fileWrite.write(name + " connected " + start);
 
             // receiving and sending back commands
-            while((input = inFromClient.readLine()) != null) {
-                System.out.println("help");
+            while((input = inFromClient.readLine())!=null) {
                 //terminating
                 if (input.equals("exit")){
+                    end = Instant.now();
+                    Duration timeElapsed = Duration.between(start, end);
+                    fileWrite.newLine();
+                    fileWrite.write(name + " disconnected, log duration: " + timeElapsed.toMillis() + "ms");
                     System.out.println("Closing a connection");
                     break;
                 }
+                System.out.println(name + ": "+ input);
 
                 // do stuff here
 
-                outToClient.writeBytes(input + "test");
+                output = input + " test";
 
+                outToClient.writeBytes(output + '\n');
             }
 
-
-         inFromClient.close();
-         outToClient.close();
-         clientSocket.close();
+            fileWrite.flush();
+            fileWrite.close();
+            inFromClient.close();
+            outToClient.close();
+            clientSocket.close();
         } catch (IOException e){
             e.printStackTrace();
         }
-
     }
 }
-
-           

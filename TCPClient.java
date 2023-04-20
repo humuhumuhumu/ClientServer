@@ -17,8 +17,8 @@ class TCPClient {
         System.out.print("Enter your name: ");
         String name = inFromUser.readLine();
         System.out.print("Enter Port: ");
-
         String p = inFromUser.readLine();
+
         int port = 6789;
         if(isInteger(p)){
             port = Integer.parseInt(p);
@@ -26,6 +26,7 @@ class TCPClient {
             System.out.println("Use a integer not a string pls");
             exit(-1);
         }
+
 
         Socket clientSocket = new Socket("127.0.0.1", port);
 

@@ -50,12 +50,16 @@ class TCPClient {
         while(true) {
             System.out.print("> ");
             sentence = inFromUser.readLine().toLowerCase();
+            // EXIT
             if(sentence.equals("exit")){
                 outToServer.writeBytes(sentence + '\n');
                 break;
             }
+
+            // SENDS TO SERVER THE COMMAND
             outToServer.writeBytes(sentence + '\n');
 
+            // RESULT
             modifiedSentence = inFromServer.readLine();
 
             System.out.println("FROM SERVER: " + modifiedSentence);

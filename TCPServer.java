@@ -84,7 +84,7 @@ class serverThread extends Thread{
 
                 // do stuff here
 
-                output = input + " test";
+                output = maths(input);
 
                 outToClient.writeBytes(output + '\n');
             }
@@ -96,6 +96,74 @@ class serverThread extends Thread{
             clientSocket.close();
         } catch (IOException e){
             e.printStackTrace();
+        }
+    }
+
+    public String maths(String s){
+        int index = 0;
+
+        s = s.replaceAll("\\s", "");
+
+        for(int i = 0; i < s.length(); i++){
+            // CHECK FOR OPERATION
+            switch (s.charAt(i)){
+                case '*':
+                case '/':
+                case '+':
+                case '-':
+                    index =i;
+                    break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    continue;
+                default:
+                    index = -1;
+                    break;
+            }
+        }
+        if(index == -1){
+            return "NOT A VALID MATH THINGY";
+        }
+
+        String firstNum = s.substring(0, index);
+
+        String secondNum = "";
+        if(isInteger(s.substring(index+1))){
+            secondNum = s.substring(index+1);
+        }
+
+        System.out.println("frist numb: " + firstNum);
+        System.out.println("second: " + secondNum);
+
+        switch (s.charAt(index)){
+            case '+':
+                return Integer.parseInt(firstNum) + Integer.parseInt(secondNum) + "";
+            case '-':
+                return Integer.parseInt(firstNum) - Integer.parseInt(secondNum) + "";
+            case '*':
+                return Integer.parseInt(firstNum) * Integer.parseInt(secondNum) + "";
+            case '/':
+                return Integer.parseInt(firstNum) / Integer.parseInt(secondNum) + "";
+            default:
+                return "NOT A VALID MATH THINGY";
+        }
+    }
+
+
+    public static boolean isInteger(String str) {
+        try {
+            Integer.parseInt(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }

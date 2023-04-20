@@ -13,7 +13,9 @@ class TCPClient {
 
         BufferedReader inFromUser =
                 new BufferedReader(new InputStreamReader(System.in));
-
+        // Name and Port input from client
+        System.out.print("Enter your name: ");
+        String name = inFromUser.readLine();
         System.out.print("Enter Port: ");
 
         String p = inFromUser.readLine();
@@ -38,19 +40,18 @@ class TCPClient {
         // CHECKING FOR CONNECTION
         if(inFromServer.readLine().equals("1")){
             System.out.println("Successfully Connected");
-        }else{
+            outToServer.writeBytes(name + '\n'); //Send name upon connection
+        } else{
             System.out.println("L");
             System.exit(-1);
         }
 
-        // SEND NAME IG
-        System.out.print("Enter your name: ");
-        outToServer.writeBytes(inFromUser.readLine() + '\n');
 
         while(true) {
             System.out.print("> ");
             sentence = inFromUser.readLine().toLowerCase();
             if(sentence.equals("exit")){
+                outToServer.writeBytes(sentence + '\n');
                 break;
             }
             outToServer.writeBytes(sentence + '\n');
@@ -73,5 +74,3 @@ class TCPClient {
         }
     }
 }
-
-        

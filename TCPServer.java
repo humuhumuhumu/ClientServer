@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.time.*;
 
 class TCPServer {
 
@@ -35,13 +36,16 @@ class serverThread extends Thread{
     public void run(){
 
         try{
-            // initializeing input output streams
+            // initializing input output streams
             String input, output;
             BufferedReader inFromClient =
                     new BufferedReader(new
                             InputStreamReader(clientSocket.getInputStream()));
             DataOutputStream outToClient =
                     new DataOutputStream(clientSocket.getOutputStream());
+
+            Instant start, end;
+            start = Instant.now();
 
             // Ack connection
             outToClient.writeBytes("1" + '\n');
@@ -53,10 +57,26 @@ class serverThread extends Thread{
                 System.out.println(name + " has entered");
             }
 
+            // creating user log
+            String logName = name + "-Log.txt";
+            File userlog = new File(logName);
+            if (userlog.createNewFile())
+                System.out.println("User log created");
+            else
+                System.out.println("User log exists");
+
+            FileWriter logFile = new FileWriter(userlog);
+            BufferedWriter fileWrite = new BufferedWriter(logFile);
+            fileWrite.write(name + " connected " + start);
+
             // receiving and sending back commands
             while((input = inFromClient.readLine())!=null) {
                 //terminating
                 if (input.equals("exit")){
+                    end = Instant.now();
+                    Duration timeElapsed = Duration.between(start, end);
+                    fileWrite.newLine();
+                    fileWrite.write(name + " disconnected, log duration: " + timeElapsed.toMillis() + "ms");
                     System.out.println("Closing a connection");
                     break;
                 }
@@ -64,19 +84,18 @@ class serverThread extends Thread{
 
                 // do stuff here
 
-                output = input + "test";
+                output = input + " test";
 
                 outToClient.writeBytes(output + '\n');
             }
 
-
-         inFromClient.close();
-         outToClient.close();
-         clientSocket.close();
+            fileWrite.flush();
+            fileWrite.close();
+            inFromClient.close();
+            outToClient.close();
+            clientSocket.close();
         } catch (IOException e){
             e.printStackTrace();
         }
     }
 }
-
-           

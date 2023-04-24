@@ -60,12 +60,15 @@ class serverThread extends Thread{
             // creating user log
             String logName = name + "-Log.txt";
             File userlog = new File(logName);
+            boolean fileExists = userlog.exists();
             if (userlog.createNewFile())
                 System.out.println("User log created");
             else
                 System.out.println("User log exists");
 
-            FileWriter logFile = new FileWriter(userlog);
+            FileWriter logFile = new FileWriter(userlog, true);
+            if(fileExists)
+                logFile.write(System.lineSeparator());
             BufferedWriter fileWrite = new BufferedWriter(logFile);
             fileWrite.write(name + " connected " + start);
 
@@ -73,18 +76,40 @@ class serverThread extends Thread{
             while((input = inFromClient.readLine())!=null) {
                 //terminating
                 if (input.equals("exit")){
+
+                    // log duration calculation + writing to file
                     end = Instant.now();
                     Duration timeElapsed = Duration.between(start, end);
-                    fileWrite.newLine();
-                    fileWrite.write(name + " disconnected, log duration: " + timeElapsed.toMillis() + "ms");
+                    long connectionTime = timeElapsed.toMillis();
+
+                    if(timeElapsed.toMinutes() > 0) {
+                        long minutes = timeElapsed.toMinutes();
+                        long seconds = timeElapsed.minusMinutes(minutes).getSeconds();
+                        fileWrite.newLine();
+                        fileWrite.write(name + " disconnected, log duration: " + minutes + " minutes " + seconds + " seconds");
+                    }
+                    else if(timeElapsed.toSeconds() > 0) {
+                        long seconds = timeElapsed.toSeconds();
+                        connectionTime = timeElapsed.minusSeconds(seconds).toMillis();
+                        fileWrite.newLine();
+                        fileWrite.write(name + " disconnected, log duration: " + seconds + " seconds " + connectionTime + " ms");
+                    }
+                    else{
+                        fileWrite.newLine();
+                        fileWrite.write(name + " disconnected, log duration: " + connectionTime + "ms");
+                    }
+
                     System.out.println("Closing a connection");
                     break;
                 }
                 System.out.println(name + ": "+ input);
 
-                // do stuff here
-
+                // return calculation if input is a valid calculation and log the calculation request
                 output = maths(input);
+                if(output.matches("\\d+")) {
+                    fileWrite.newLine();
+                    fileWrite.write(name + ": " + input);
+                }
 
                 outToClient.writeBytes(output + '\n');
             }
@@ -95,14 +120,12 @@ class serverThread extends Thread{
             outToClient.close();
             clientSocket.close();
         } catch (IOException e){
-
             e.printStackTrace();
         }
     }
 
     public String maths(String s){
-        int index = -1;
-        int countOperations = 0;
+        int index = 0;
 
         s = s.replaceAll("\\s", "");
 
@@ -114,8 +137,7 @@ class serverThread extends Thread{
                 case '+':
                 case '-':
                     index =i;
-                    countOperations++;
-                    continue;
+                    break;
                 case '0':
                 case '1':
                 case '2':
@@ -132,25 +154,32 @@ class serverThread extends Thread{
                     break;
             }
         }
-        if(index == -1||countOperations != 1){
-            return "NOT A VALID MATH THINGY";
+        if(index == -1){
+            return "NOT A VALID MATH CALCULATION";
         }
 
         String firstNum = s.substring(0, index);
 
-        String secondNum = s.substring(index+1);
+        String secondNum = "";
+        if(isInteger(s.substring(index+1))){
+            secondNum = s.substring(index+1);
+            System.out.println("frist numb: " + firstNum);
+            System.out.println("second: " + secondNum);
 
-        switch (s.charAt(index)){
-            case '+':
-                return Integer.parseInt(firstNum) + Integer.parseInt(secondNum) + "";
-            case '-':
-                return Integer.parseInt(firstNum) - Integer.parseInt(secondNum) + "";
-            case '*':
-                return Integer.parseInt(firstNum) * Integer.parseInt(secondNum) + "";
-            case '/':
-                return Integer.parseInt(firstNum) / Integer.parseInt(secondNum) + "";
-            default:
-                return "NOT A VALID MATH THINGY";
+            switch (s.charAt(index)){
+                case '+':
+                    return Integer.parseInt(firstNum) + Integer.parseInt(secondNum) + "";
+                case '-':
+                    return Integer.parseInt(firstNum) - Integer.parseInt(secondNum) + "";
+                case '*':
+                    return Integer.parseInt(firstNum) * Integer.parseInt(secondNum) + "";
+                case '/':
+                    return Integer.parseInt(firstNum) / Integer.parseInt(secondNum) + "";
+                default:
+                    return "NOT A VALID MATH CALCULATION";
+            }
+        } else {
+            return "NOT A VALID MATH CALCULATION";
         }
     }
 

@@ -15,6 +15,10 @@ class TCPServer {
 
         while(true) {
             try {
+                /*
+                Whenever a connection comes through the welcome socket,
+                create a thread to allow synchronized processing
+                 */
                 Socket connectionSocket = welcomeSocket.accept();
 
                 Thread t = new Thread(new serverThread(connectionSocket));
@@ -36,7 +40,7 @@ class serverThread extends Thread{
     public void run(){
 
         try{
-            // initializing input output streams
+            // Initializing input, output streams
             String input, output;
             BufferedReader inFromClient =
                     new BufferedReader(new
@@ -44,6 +48,7 @@ class serverThread extends Thread{
             DataOutputStream outToClient =
                     new DataOutputStream(clientSocket.getOutputStream());
 
+            // Start recording user time
             Instant start, end;
             start = Instant.now();
 
@@ -57,7 +62,7 @@ class serverThread extends Thread{
                 System.out.println(name + " has entered");
             }
 
-            // creating user log
+            // Creating User Log
             String logName = name + "-Log.txt";
             File userlog = new File(logName);
             boolean fileExists = userlog.exists();
@@ -72,9 +77,9 @@ class serverThread extends Thread{
             BufferedWriter fileWrite = new BufferedWriter(logFile);
             fileWrite.write(name + " connected " + start);
 
-            // receiving and sending back commands
+            // Receiving and sending back commands
             while((input = inFromClient.readLine())!=null) {
-                //terminating
+                // Terminating
                 if (input.equals("exit")){
 
                     // log duration calculation + writing to file
@@ -99,7 +104,7 @@ class serverThread extends Thread{
                         fileWrite.write(name + " disconnected, log duration: " + connectionTime + "ms");
                     }
 
-                    System.out.println("Closing a connection");
+                    System.out.println("Closing connection: " + name);
                     break;
                 }
                 System.out.println(name + ": "+ input);
@@ -107,11 +112,13 @@ class serverThread extends Thread{
                 // return calculation if input is a valid calculation and log the calculation request
                 output = maths(input);
                 if(output.matches("\\d+")) {
-                    fileWrite.newLine();
-                    fileWrite.write(name + ": " + input);
+
                 }
+                fileWrite.newLine();
+                fileWrite.write(name + ": " + input + " Server: " + output);
 
                 outToClient.writeBytes(output + '\n');
+                System.out.println("Server: " + output);
             }
 
             fileWrite.flush();
@@ -124,6 +131,7 @@ class serverThread extends Thread{
         }
     }
 
+    // How the math string is parsed
     public String maths(String s){
         int index = 0;
 
@@ -131,12 +139,13 @@ class serverThread extends Thread{
 
         for(int i = 0; i < s.length(); i++){
             // CHECK FOR OPERATION
+            // Find the index of the operation, while also verifying that the first number is indeed a number
             switch (s.charAt(i)){
                 case '*':
                 case '/':
                 case '+':
                 case '-':
-                    index =i;
+                    index = i;
                     break;
                 case '0':
                 case '1':
@@ -158,13 +167,12 @@ class serverThread extends Thread{
             return "NOT A VALID MATH CALCULATION";
         }
 
+        // Grab first number
         String firstNum = s.substring(0, index);
-
         String secondNum = "";
+        // Checks if the part after the operation is a number
         if(isInteger(s.substring(index+1))){
             secondNum = s.substring(index+1);
-            System.out.println("frist numb: " + firstNum);
-            System.out.println("second: " + secondNum);
 
             switch (s.charAt(index)){
                 case '+':
@@ -179,17 +187,32 @@ class serverThread extends Thread{
                     return "NOT A VALID MATH CALCULATION";
             }
         } else {
+            // After the operation, if the string is not only numbers then it errors
             return "NOT A VALID MATH CALCULATION";
         }
     }
 
 
     public static boolean isInteger(String str) {
-        try {
-            Integer.parseInt(str);
-            return true;
-        } catch (NumberFormatException e) {
-            return false;
+        System.out.println(str);
+        boolean isInt = true;
+        for (int i = 0; i < str.length(); i++) {
+            switch (str.charAt(i)){
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    continue;
+                default:
+                    isInt = false;
+            }
         }
+        return isInt;
     }
 }

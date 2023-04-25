@@ -13,13 +13,14 @@ class TCPClient {
 
         BufferedReader inFromUser =
                 new BufferedReader(new InputStreamReader(System.in));
+
         // Name and Port input from client
         System.out.print("Enter your name: ");
         String name = inFromUser.readLine();
         System.out.print("Enter Port: ");
         String p = inFromUser.readLine();
 
-        int port = 6789;
+        int port = 6789; // Number is used as a place holder until the user enters the port
         if(isInteger(p)){
             port = Integer.parseInt(p);
         }else{
@@ -27,9 +28,10 @@ class TCPClient {
             exit(-1);
         }
 
+        // Server that you are connecting to is 127.0.0.1 or the localhost
+        Socket clientSocket = new Socket("127.0.0.1", 1234);
 
-        Socket clientSocket = new Socket("127.0.0.1", port);
-
+        // Initialize input and output streams.
         DataOutputStream outToServer =
                 new DataOutputStream(clientSocket.getOutputStream());
 
@@ -47,7 +49,7 @@ class TCPClient {
             System.exit(-1);
         }
 
-
+        // Sending and receiving commands, until the client decides to exit the connection.
         while(true) {
             System.out.print("> ");
             sentence = inFromUser.readLine().toLowerCase();
@@ -63,7 +65,7 @@ class TCPClient {
             // RESULT
             modifiedSentence = inFromServer.readLine();
 
-            System.out.println("FROM SERVER: " + modifiedSentence);
+            System.out.println(modifiedSentence);
 
         }
         clientSocket.close();

@@ -29,7 +29,7 @@ class TCPClient {
         }
 
         // Server that you are connecting to is 127.0.0.1 or the localhost
-        Socket clientSocket = new Socket("127.0.0.1", 1234);
+        Socket clientSocket = new Socket("127.0.0.1", port);
 
         // Initialize input and output streams.
         DataOutputStream outToServer =
